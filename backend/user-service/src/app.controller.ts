@@ -1,7 +1,7 @@
-import { Controller, Get, Body, Post } from '@nestjs/common';
+// src/user/user.controller.ts
+import { Controller, Post, Body } from '@nestjs/common';
 import { UserService } from './app.service';
-
-@Controller()
+@Controller('auth')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -11,7 +11,6 @@ export class UserController {
     body: {
       email: string;
       password: string;
-      fullName: string;
       role: 'Administrator' | 'Client';
     },
   ) {
@@ -23,8 +22,13 @@ export class UserController {
     return this.userService.signin(body.email, body.password);
   }
 
-  @Get()
-  getStatus(): { status: string } {
-    return { status: 'ok' };
+  @Post('assign-permission')
+  assignPermission(@Body() body: { role: string; permission: string }) {
+    return this.userService.assignPermissionToRole(body.role, body.permission);
+  }
+
+  @Post('authorize')
+  authorize(@Body() body: { userId: string; permission: string }) {
+    return this.userService.authorize(body.userId, body.permission);
   }
 }

@@ -1,15 +1,18 @@
+// src/user/user.service.ts
 import {
-  BadRequestException,
   Injectable,
+  BadRequestException,
   UnauthorizedException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
 import { User } from './models/user.entity';
 import { Role } from './models/role.entity';
+import { Permission } from './models/permision.entity';
 import { Credential } from './models/credential.entity';
-import { Repository } from 'typeorm';
-import { JwtService } from '@nestjs/jwt';
-import bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -17,8 +20,11 @@ export class UserService {
     @InjectRepository(User) private userRepo: Repository<User>,
     @InjectRepository(Role) private roleRepo: Repository<Role>,
     @InjectRepository(Credential) private credRepo: Repository<Credential>,
+    @InjectRepository(Permission) private permRepo: Repository<Permission>,
     private jwtService: JwtService,
   ) {}
+
+  // ============ SIGNUP ============
   async signup(
     email: string,
     password: string,
@@ -29,10 +35,12 @@ export class UserService {
     });
     if (existing) throw new BadRequestException('Email already exists');
 
-    let role = await this.roleRepo.findOne({ where: { name: roleName } });
+    const role = await this.roleRepo.findOne({
+      where: { name: roleName },
+      relations: ['permissions'],
+    });
     if (!role) {
-      role = this.roleRepo.create({ name: roleName });
-      await this.roleRepo.save(role);
+      throw new BadRequestException('Role not valid');
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
@@ -44,16 +52,14 @@ export class UserService {
     });
 
     await this.userRepo.save(user);
-
     return { message: 'User created successfully', userId: user.id };
   }
 
-  async signin(username: string, password: string) {
+  async signin(email: string, password: string) {
     const user = await this.userRepo.findOne({
-      where: { username },
-      relations: ['credential', 'role'],
+      where: { username: email },
+      relations: ['credential', 'role', 'role.permissions'],
     });
-
     if (!user) throw new UnauthorizedException('Invalid credentials');
 
     const isMatch = await bcrypt.compare(
@@ -63,6 +69,47 @@ export class UserService {
     if (!isMatch) throw new UnauthorizedException('Invalid credentials');
 
     const token = this.jwtService.sign({ sub: user.id, role: user.role.name });
-    return { access_token: token };
+    return { access_token: token, expiresIn: 60 };
+  }
+
+  async assignPermissionToRole(roleName: string, permissionName: string) {
+    const role = await this.roleRepo.findOne({
+      where: { name: roleName },
+      relations: ['permissions'],
+    });
+    if (!role) throw new BadRequestException('Role not found');
+
+    let permission = await this.permRepo.findOne({
+      where: { name: permissionName },
+    });
+    if (!permission) {
+      permission = this.permRepo.create({ name: permissionName });
+      await this.permRepo.save(permission);
+    }
+
+    if (!role.permissions.find((p) => p.name === permissionName)) {
+      role.permissions.push(permission);
+      await this.roleRepo.save(role);
+    }
+
+    return {
+      message: `Permission '${permissionName}' assigned to role '${roleName}'`,
+    };
+  }
+
+  async authorize(userId: string, permissionName: string) {
+    const user = await this.userRepo.findOne({
+      where: { id: userId },
+      relations: ['role', 'role.permissions'],
+    });
+    if (!user) throw new UnauthorizedException('User not found');
+
+    const hasPermission = user.role.permissions.some(
+      (p) => p.name === permissionName,
+    );
+    if (!hasPermission)
+      throw new ForbiddenException('User does not have permission');
+
+    return { authorized: true };
   }
 }

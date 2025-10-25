@@ -10,14 +10,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router";
-export const Login = () => {
+export const SignupPage = () => {
   return (
     <div className="w-full max-w-lg mx-auto">
       <Card>
         <CardHeader>
-          <CardTitle>Iniciar sesión</CardTitle>
+          <CardTitle>Crea una cuenta</CardTitle>
           <CardDescription>
-            Ingresa tus credenciales para continuar.
+            Ingresa los datos para crear una cuenta.
           </CardDescription>
         </CardHeader>
 
@@ -38,10 +38,10 @@ export const Login = () => {
           </CardContent>
 
           <CardFooter className="justify-end gap-2">
-            <Link to="/auth/signup" className="text-sm mr-2">
-              Registrarme
+            <Link to="/auth/login" className="text-sm mr-2">
+              Ya tengo una cuenta
             </Link>
-            <Button type="submit">Ingresar</Button>
+            <Button type="submit">Crear cuenta</Button>
           </CardFooter>
         </form>
       </Card>
