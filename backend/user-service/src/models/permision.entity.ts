@@ -10,6 +10,6 @@ export class Permission {
   @Column({ unique: true })
   name: string; // ejemplo: 'CREATE_APPOINTMENT', 'DELETE_USER'
 
-  @ManyToMany(() => Role, role => role.permissions)
+  @ManyToMany(() => Role, (role) => role.permissions)
   roles: Role[];
 }

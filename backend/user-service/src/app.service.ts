@@ -97,6 +97,23 @@ export class UserService {
     };
   }
 
+  async validateToken(token: string): Promise<User | null> {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const decoded = this.jwtService.verify(token, {
+        secret: process.env.JWT_SECRET!,
+      });
+      const user = await this.userRepo.findOne({
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        where: { id: decoded['sub'] as string },
+        relations: ['role'],
+      });
+      return user || null;
+    } catch {
+      return null;
+    }
+  }
+
   async authorize(userId: string, permissionName: string) {
     const user = await this.userRepo.findOne({
       where: { id: userId },
@@ -111,5 +128,12 @@ export class UserService {
       throw new ForbiddenException('User does not have permission');
 
     return { authorized: true };
+  }
+  async getUserById(userId: string): Promise<User | null> {
+    const user = await this.userRepo.findOne({
+      where: { id: userId },
+      relations: ['role'],
+    });
+    return user || null;
   }
 }

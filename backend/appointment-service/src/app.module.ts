@@ -1,7 +1,8 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { AppointmentModule } from './appointment/appointment.module';
 import { Appointment } from './models/appointment.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthMiddleware } from './middlewares/auth.middleware';
 
 @Module({
   imports: [
@@ -18,4 +19,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     AppointmentModule,
   ],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(AuthMiddleware).forRoutes('*'); // Aplica a todas las rutas
+  }
+}
