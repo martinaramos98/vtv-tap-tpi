@@ -8,6 +8,8 @@ import {
 } from "react";
 import Cookies from "js-cookie";
 import type { AxiosError } from "axios";
+import { userAPI } from "../rest/UserAPI";
+import { useNavigate } from "react-router";
 
 type User = {
   id: string;
@@ -20,14 +22,17 @@ type AuthContextType = {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
-  signin: (email: string, password: string) => Promise<void>;
+  signin: (email: string, password: string) => Promise<unknown>;
   signout: () => void;
   onUnauthorized: (error: AxiosError) => void;
+  signup: (email: string, password: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const navigate = useNavigate();
+
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
 
@@ -35,48 +40,68 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const sessionToken = Cookies.get("session_token");
     if (sessionToken) {
       setToken(sessionToken);
-      // mock user from token validation
-      setUser({
-        id: "mock-user-id",
-        fullName: "John Doe",
-        email: "john@example.com",
-        role: "Client",
-      });
+      getUserData(sessionToken);
     }
   }, []);
 
-  const signin = async (email: string, password: string) => {
-    // mock API call
-    const mockResponse = {
-      token: "mock-jwt-token",
-      user: {
-        id: "mock-user-id",
-        fullName: "John Doe",
+  const signup = async (email: string, password: string) => {
+    try {
+      await userAPI.post("/auth/signup", {
         email,
-        role: "Administrator" as const,
-      },
-    };
+        password,
+        role: "Client",
+      });
+      navigate("/auth/login");
+    } catch (error) {
+      console.error("Failed to sign up", error);
+    }
+  };
 
-    Cookies.set("session_token", mockResponse.token, {
-      expires: 1,
-      sameSite: "strict",
-    });
-    setToken(mockResponse.token);
-    setUser(mockResponse.user);
+  const signin = async (email: string, password: string) => {
+    try {
+      const tokenResponse = await userAPI.post("/auth/signin", {
+        email,
+        password,
+      });
+
+      const userToken = tokenResponse.data.token;
+
+      Cookies.set("session_token", userToken, {
+        expires: 1,
+        sameSite: "strict",
+      });
+      await getUserData(userToken);
+      setToken(userToken);
+      navigate("/");
+    } catch (error) {
+      return error;
+    }
   };
 
   const signout = () => {
     Cookies.remove("session_token");
     setUser(null);
     setToken(null);
-    window.location.href = "/login";
+    navigate("/login");
   };
   const onUnauthorized = (error: AxiosError) => {
     if (error.response?.status === 401) {
       signout();
     }
   };
-
+  const getUserData = async (token: string) => {
+    try {
+      const userDataResponse = await userAPI.get("/auth/me", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const userData = userDataResponse.data;
+      setUser(userData);
+    } catch (error) {
+      console.error("Failed to fetch user data", error);
+    }
+  };
   return (
     <AuthContext.Provider
       value={{
@@ -84,6 +109,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         token,
         isAuthenticated: !!user && !!token,
         signin,
+        signup,
         signout,
         onUnauthorized,
       }}
@@ -93,4 +119,5 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => useContext(AuthContext);

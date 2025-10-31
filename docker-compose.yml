@@ -1,0 +1,111 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: postgres-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: main_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  user-service:
+    build: ./backend/user-service
+    container_name: user-service
+    restart: always
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: postgres
+      DATABASE_NAME: main_db
+      SERVICE_PORT: 3001
+    ports:
+      - '3001:3001'
+    networks:
+      - app-network
+
+  appointment-service:
+    build: ./backend/appointment-service
+    container_name: appointment-service
+    restart: always
+    depends_on:
+      - postgres
+      - user-service
+    environment:
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: postgres
+      DATABASE_NAME: main_db
+      SERVICE_PORT: 3002
+      USER_SERVICE_URL: http://user-service:3001
+    ports:
+      - '3002:3002'
+    networks:
+      - app-network
+
+  # 📊 Scoring Service
+  scoring-service:
+    build: ./backend/scoring-service
+    container_name: scoring-service
+    restart: always
+    depends_on:
+      - postgres
+      - appointment-service
+    environment:
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: postgres
+      DATABASE_NAME: main_db
+      SERVICE_PORT: 3003
+      APPOINTMENT_SERVICE_URL: http://appointment-service:3002
+    ports:
+      - '3003:3003'
+    networks:
+      - app-network
+
+  # 🎨 Frontend (Vite)
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    restart: always
+    depends_on:
+      - user-service
+      - appointment-service
+      - scoring-service
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend
+          target: /app
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: package.json
+    ports:
+      - '5173:5173'
+    environment:
+      VITE_API_USER_URL: http://user-service:3001
+      VITE_API_APPOINTMENT_URL: http://appointment-service:3002
+      VITE_API_SCORING_URL: http://scoring-service:3003
+
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

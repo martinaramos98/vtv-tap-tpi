@@ -1,16 +1,19 @@
 import { useAuth } from "@/app/contexts/UserContext";
 import { appointmentAPI } from "@/app/rest/AppointmentAPI";
-import type { Appointment } from "../interfaces/Appointment";
+import type {
+  Appointment,
+  AppointmentWithScores,
+} from "../interfaces/Appointment";
 
 export interface IAppointmentsService {
-  getAppointments: () => Promise<Appointment[]>;
+  getAppointments: () => Promise<AppointmentWithScores[]>;
   createAppointment: (appointmentData: {
     date: string;
     matricula: string;
   }) => Promise<Appointment>;
 }
 
-export const useAppointmentsHook = () => {
+export const useAppointmentsHook = (): IAppointmentsService => {
   const authContext = useAuth();
 
   const getAppointments = async () => {
@@ -31,11 +34,16 @@ export const useAppointmentsHook = () => {
     matricula: string;
   }) => {
     try {
-      await appointmentAPI.post("/appointments", appointmentData, {
-        headers: {
-          Authorization: `Bearer ${authContext.token}`,
-        },
-      });
+      const response = await appointmentAPI.post(
+        "/appointments",
+        appointmentData,
+        {
+          headers: {
+            Authorization: `Bearer ${authContext.token}`,
+          },
+        }
+      );
+      return response.data;
     } catch (error) {
       console.error("Error creating appointment:", error);
     }

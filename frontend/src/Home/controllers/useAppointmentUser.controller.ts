@@ -1,11 +1,11 @@
 import { useActionState, useEffect, useState } from "react";
 import type { IAppointmentsService } from "../services/useAppointments.hook";
-import { type Appointment } from "../interfaces/Appointment";
+import { type AppointmentWithScores } from "../interfaces/Appointment";
 
 export const useAppointmentsUserController = (
   appointmentsHookService: IAppointmentsService
 ) => {
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [appointments, setAppointments] = useState<AppointmentWithScores[]>([]);
   const getAppointmentsHandler = async () => {
     const data = await appointmentsHookService.getAppointments();
     if (data) {

@@ -1,6 +1,6 @@
 import App from "@/App";
 import { createBrowserRouter } from "react-router";
-import { HomePage } from "../Routes/Home";
+import { HomePage } from "../Routes/HomePage";
 import { Login } from "../Routes/Login";
 import { SignupPage } from "../Routes/Signup";
 
