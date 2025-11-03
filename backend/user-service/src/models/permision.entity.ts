@@ -7,7 +7,7 @@ export class Permission {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ unique: true })
+  @Column({ unique: true, type: 'text' })
   name: string; // ejemplo: 'CREATE_APPOINTMENT', 'DELETE_USER'
 
   @ManyToMany(() => Role, (role) => role.permissions)

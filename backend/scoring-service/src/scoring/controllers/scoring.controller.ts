@@ -16,6 +16,11 @@ export class ScoreController {
     return this.scoreService.findAll();
   }
 
+  @Get('completed')
+  findAllCompleted() {
+    return this.scoreService.findAllCompleted();
+  }
+
   @Get('appointment/:appointmentId')
   findByAppointment(@Param('appointmentId') appointmentId: string) {
     return this.scoreService.findByAppointment(appointmentId);

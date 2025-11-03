@@ -1,77 +1,85 @@
-version: '3.9'
+version: "3.9"
 
 services:
-  postgres:
+  db:
     image: postgres:16
-    container_name: postgres-db
+    container_name: db
     restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: main_db
     ports:
-      - '5432:5432'
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - app-network
 
   user-service:
-    build: ./backend/user-service
+    build:
+      context: ./backend/user-service
+      dockerfile: Dockerfile
     container_name: user-service
     restart: always
     depends_on:
-      - postgres
+      - db
     environment:
-      DATABASE_HOST: postgres
+      DATABASE_HOST: db
       DATABASE_PORT: 5432
       DATABASE_USER: postgres
       DATABASE_PASSWORD: postgres
       DATABASE_NAME: main_db
-      SERVICE_PORT: 3001
+      SERVICE_PORT: 8001
+      NODE_ENV: development
     ports:
-      - '3001:3001'
+      - "8001:8001"
     networks:
       - app-network
 
   appointment-service:
-    build: ./backend/appointment-service
+    build:
+      context: ./backend/appointment-service
+      dockerfile: Dockerfile
     container_name: appointment-service
     restart: always
     depends_on:
-      - postgres
-      - user-service
+      - db
     environment:
-      DATABASE_HOST: postgres
+      DATABASE_HOST: db
       DATABASE_PORT: 5432
       DATABASE_USER: postgres
       DATABASE_PASSWORD: postgres
       DATABASE_NAME: main_db
-      SERVICE_PORT: 3002
-      USER_SERVICE_URL: http://user-service:3001
+      SERVICE_PORT: 8002
+      USER_SERVICE_URL: http://user-service:8001
+      NODE_ENV: development
     ports:
-      - '3002:3002'
+      - "8002:8002"
     networks:
       - app-network
 
   # 📊 Scoring Service
   scoring-service:
-    build: ./backend/scoring-service
+    build:
+      context: ./backend/scoring-service
+      dockerfile: Dockerfile
     container_name: scoring-service
     restart: always
+    # command: tail -f /dev/null
     depends_on:
-      - postgres
-      - appointment-service
+      - db
     environment:
-      DATABASE_HOST: postgres
+      DATABASE_HOST: db
       DATABASE_PORT: 5432
       DATABASE_USER: postgres
       DATABASE_PASSWORD: postgres
       DATABASE_NAME: main_db
-      SERVICE_PORT: 3003
-      APPOINTMENT_SERVICE_URL: http://appointment-service:3002
+      SERVICE_PORT: 8003
+      USER_SERVICE_URL: http://user-service:8001
+      NODE_ENV: development
     ports:
-      - '3003:3003'
+      - "8003:8003"
     networks:
       - app-network
 
@@ -94,7 +102,7 @@ services:
         - action: rebuild
           path: package.json
     ports:
-      - '5173:5173'
+      - "5173:5173"
     environment:
       VITE_API_USER_URL: http://user-service:3001
       VITE_API_APPOINTMENT_URL: http://appointment-service:3002

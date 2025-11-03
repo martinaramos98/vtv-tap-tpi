@@ -12,7 +12,7 @@ export class Score {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'int', nullable: false })
+  @Column('float')
   value: number;
 
   @Column({ type: 'text', nullable: true })
@@ -21,7 +21,8 @@ export class Score {
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 
-  @Column({ type: 'uuid', nullable: false })
+  // Foreign key (appointmentId) que referencia a otro servicio
+  @Column({ type: 'uuid' })
   appointmentId: string;
 
   @ManyToOne(() => Appointment, (appointment) => appointment.scores, {

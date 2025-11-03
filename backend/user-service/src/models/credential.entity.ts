@@ -13,7 +13,7 @@ export class Credential {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ type: 'text' })
   passwordHash: string;
 
   @OneToOne(() => User, (user) => user.credential, { onDelete: 'CASCADE' })

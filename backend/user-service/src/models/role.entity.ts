@@ -15,7 +15,7 @@ export class Role {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ unique: true })
+  @Column({ unique: true, type: 'text' })
   name: string;
 
   @OneToMany(() => User, (user) => user.role)

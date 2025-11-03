@@ -7,9 +7,11 @@ export const Navbar: React.FC = () => {
     <>
       {isAuthenticated && (
         <nav>
-          <Avatar>
-            <AvatarFallback>{user.name}</AvatarFallback>
-          </Avatar>
+          {user && (
+            <Avatar>
+              <AvatarFallback>{user.fullName}</AvatarFallback>
+            </Avatar>
+          )}
         </nav>
       )}
     </>

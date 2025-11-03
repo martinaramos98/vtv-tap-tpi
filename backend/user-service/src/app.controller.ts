@@ -5,6 +5,7 @@ import {
   Body,
   Get,
   Req,
+  Headers,
   UnauthorizedException,
   InternalServerErrorException,
 } from '@nestjs/common';
@@ -36,32 +37,44 @@ export class UserController {
   }
 
   @Post('authorize')
-  authorize(@Body() body: { userId: string; permission: string }) {
-    return this.userService.authorize(body.userId, body.permission);
+  authorize(@Headers('authorization') authHeader: string) {
+    if (!authHeader) {
+      throw new UnauthorizedException();
+    }
+    const token: string = authHeader.replace('Bearer ', '').trim();
+    const decoded = this.userService.validateToken(token);
+    return decoded;
   }
+
   @Get('validate')
-  async validate(@Req() req: Request) {
-    const authHeader = req.headers.get('authorization') as string | undefined;
+  validate(@Headers('authorization') authHeader: string) {
     if (!authHeader) {
       throw new UnauthorizedException();
     }
 
     const token = authHeader.replace('Bearer ', '').trim();
-    const user = await this.userService.validateToken(token);
+    const decoded = this.userService.validateToken(token);
 
-    if (!user) throw new UnauthorizedException();
+    if (!decoded) throw new UnauthorizedException();
 
-    return { user };
+    return { decoded };
   }
+
   @Get('user')
-  async getUser(@Req() req: Request) {
-    const authHeader = req.headers.get('authorization') as string | undefined;
+  async getUser(@Headers('authorization') authHeader: string) {
     if (!authHeader) {
       throw new UnauthorizedException();
     }
     const token: string = authHeader.replace('Bearer ', '').trim();
-    const user = await this.userService.validateToken(token);
+    const decoded = this.userService.validateToken(token);
+    if (!decoded) throw new UnauthorizedException();
+    const user = await this.userService.getUserById(decoded.sub);
     if (!user) throw new InternalServerErrorException();
     return user;
+  }
+
+  @Get('health')
+  healthCheck() {
+    return { status: 'ok' };
   }
 }

@@ -6,10 +6,29 @@ export const ScoreQuestionItem: React.FC<{
   onAnswer: IScoreAppointmentFormHook["onAnswerScore"];
 }> = ({ score, onAnswer }) => {
   const items = Array.from({ length: 10 }, (_, i) => i + 1);
+  const onClickAnswer = (item: number) => {
+    onAnswer({
+      ...score,
+      value: item,
+    });
+  };
   return (
     <div>
       <h3>{score.description}</h3>
-      {items.map((item) => {})}
+      <ul>
+        {items.map((item) => (
+          <li key={item}>
+            <button
+              type="button"
+              onClick={() => {
+                onClickAnswer(item);
+              }}
+            >
+              {item}
+            </button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };

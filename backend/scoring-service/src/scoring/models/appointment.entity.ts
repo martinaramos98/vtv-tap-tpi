@@ -13,16 +13,16 @@ export class Appointment {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ type: 'text', nullable: false })
   matricula: string; // dato clave (por ejemplo, matrícula profesional o vehículo)
 
-  @Column()
+  @Column({ type: 'uuid', nullable: false })
   clientId: string; // id del usuario que reserva (referencia a user-service)
 
-  @Column()
+  @Column({ type: 'timestamp', nullable: false })
   date: Date; // fecha y hora del turno
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
   @OneToMany(() => Score, (score) => score.appointment)
   scores: Score[];

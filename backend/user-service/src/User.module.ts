@@ -8,12 +8,13 @@ import { UserController } from './app.controller';
 import { User } from './models/user.entity';
 import { Role } from './models/role.entity';
 import { Credential } from './models/credential.entity';
+import { Permission } from './models/permision.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Role, Credential]),
+    TypeOrmModule.forFeature([User, Role, Credential, Permission]),
     JwtModule.register({
-      secret: 'secret-key', // ⚠️ Usar variable de entorno
+      secret: process.env.JWT_SECRET || 'secret-key', // ⚠️ Usar variable de entorno
       signOptions: { expiresIn: '1h' },
     }),
   ],

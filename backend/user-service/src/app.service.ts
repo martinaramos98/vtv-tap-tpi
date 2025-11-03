@@ -30,6 +30,9 @@ export class UserService {
     password: string,
     roleName: 'Administrator' | 'Client',
   ) {
+    if (!email || !password) {
+      throw new BadRequestException('Email and password are required');
+    }
     const existing = await this.userRepo.findOne({
       where: { username: email },
     });
@@ -55,6 +58,7 @@ export class UserService {
     return { message: 'User created successfully', userId: user.id };
   }
 
+  // ============ SIGNIN ============
   async signin(email: string, password: string) {
     const user = await this.userRepo.findOne({
       where: { username: email },
@@ -68,7 +72,11 @@ export class UserService {
     );
     if (!isMatch) throw new UnauthorizedException('Invalid credentials');
 
-    const token = this.jwtService.sign({ sub: user.id, role: user.role.name });
+    const token = this.jwtService.sign({
+      sub: user.id,
+      role: user.role.name,
+      permissions: user.role.permissions.map((p) => p.name),
+    });
     return { access_token: token, expiresIn: 60 };
   }
 
@@ -97,18 +105,15 @@ export class UserService {
     };
   }
 
-  async validateToken(token: string): Promise<User | null> {
+  validateToken(
+    token: string,
+  ): { sub: string; role: string; permissions?: string[] } | null {
     try {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const decoded = this.jwtService.verify(token, {
         secret: process.env.JWT_SECRET!,
       });
-      const user = await this.userRepo.findOne({
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        where: { id: decoded['sub'] as string },
-        relations: ['role'],
-      });
-      return user || null;
+      return decoded as { sub: string; role: string; permissions?: string[] };
     } catch {
       return null;
     }

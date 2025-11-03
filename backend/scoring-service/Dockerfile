@@ -1,5 +1,5 @@
 # ---- Base Node Image ----
-FROM node:22-alpine AS builder
+FROM node:24-alpine AS builder
 
 WORKDIR /app
 
@@ -15,7 +15,7 @@ COPY . .
 RUN npx nest build
 
 # ---- Production Image ----
-FROM node:22-alpine
+FROM node:24-alpine
 
 WORKDIR /app
 
@@ -25,6 +25,7 @@ RUN npm install -g pnpm@latest
 RUN pnpm install
 COPY --from=builder /app/dist ./dist
 
+
 EXPOSE ${SERVICE_PORT}
 
-CMD ["node", "dist/main.js"]
+CMD ["node", "dist/src/main.js"]

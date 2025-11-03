@@ -1,4 +1,5 @@
 import { Spinner } from "@/components/ui/spinner";
+import { ScoreQuestionItem } from "@/ScoreAppointments/components/ScoreQuestionItem";
 import { useAdminAppointmentsHook } from "@/ScoreAppointments/hooks/useAdminAppointments.hook";
 import { useScoreAppointmentForm } from "@/ScoreAppointments/hooks/useScoreAppointmentForm";
 import { useParams } from "react-router";
@@ -12,22 +13,30 @@ export const ScoreFormPage: React.FC = () => {
   );
   return (
     <article>
-      {scoreAppointmentFormHook.isLoading && <>
-        <Spinner className="size-12" />
-        <p>Cargando verificacion...</p>
-      </>}
-      {!scoreAppointmentFormHook.isLoading && scoreAppointmentFormHook.scoreAppointmentData && (
+      {scoreAppointmentFormHook.isLoading && (
         <>
-          <h1>Verificacion de: {scoreAppointmentFormHook.scoreAppointmentData.matricula}</h1>
-          <form>
-            {scoreAppointmentFormHook.scores.map((score) => (
-            
-            )
-          </form>
+          <Spinner className="size-12" />
+          <p>Cargando verificacion...</p>
         </>
       )}
-
+      {!scoreAppointmentFormHook.isLoading &&
+        scoreAppointmentFormHook.scoreAppointmentData && (
+          <>
+            <h1>
+              Verificacion de:{" "}
+              {scoreAppointmentFormHook.scoreAppointmentData.matricula}
+            </h1>
+            <form>
+              {scoreAppointmentFormHook.scores.map((score) => (
+                <ScoreQuestionItem
+                  score={score}
+                  key={score.id}
+                  onAnswer={scoreAppointmentFormHook.onAnswerScore}
+                />
+              ))}
+            </form>
+          </>
+        )}
     </article>
-
-  )
-}
+  );
+};

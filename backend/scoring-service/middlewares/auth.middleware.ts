@@ -5,11 +5,9 @@ import {
 } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import axios from 'axios';
-import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthMiddleware implements NestMiddleware {
-  constructor(private readonly configService: ConfigService) {}
   async use(req: Request, res: Response, next: NextFunction) {
     const authHeader = req.headers['authorization'];
 
@@ -22,7 +20,7 @@ export class AuthMiddleware implements NestMiddleware {
     try {
       // Llamada al user-service para validar token
       const response = await axios.get(
-        `${this.configService.get<string>('USER_SERVICE_URL')}/auth/validate`,
+        `${process.env.USER_SERVICE_URL}/auth/validate`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
