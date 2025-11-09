@@ -5,6 +5,7 @@ import { Login } from "../Routes/Login";
 import { SignupPage } from "../Routes/Signup";
 import { CreateAppointmentPage } from "../Routes/CreateAppointmentPage";
 import { ScoreFormPage } from "../Routes/ScoreFormPage";
+import { AppointmentResultDetail } from "../Routes/AppointmentResultDetail";
 
 export const router = createBrowserRouter([
   {

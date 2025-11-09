@@ -5,9 +5,13 @@ import { Appointment } from 'src/models/appointment.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { HttpModule } from '@nestjs/axios';
 import { Score } from 'src/models/score.entity';
+import { ServicePoints } from 'src/models/servicePoints.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Appointment, Score]), HttpModule],
+  imports: [
+    TypeOrmModule.forFeature([Appointment, Score, ServicePoints]),
+    HttpModule,
+  ],
   providers: [AppointmentService],
   controllers: [AppointmentController],
 })

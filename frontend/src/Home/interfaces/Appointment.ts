@@ -6,9 +6,15 @@ export interface Appointment {
 }
 
 export interface AppointmentWithScores extends Appointment {
-  scores: Score[];
+  scores: ScoreResult[];
 }
 
+export interface ScoreResult {
+  id: string;
+  name: string;
+  description: string;
+  value: number;
+}
 export interface Score {
   id: string;
   value: number;

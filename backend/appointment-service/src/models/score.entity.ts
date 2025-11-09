@@ -6,27 +6,33 @@ import {
   ManyToOne,
 } from 'typeorm';
 import { Appointment } from './appointment.entity';
+import { ServicePoints } from './servicePoints.entity';
 
 @Entity()
 export class Score {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column('float')
+  @Column({ type: 'int', nullable: false })
   value: number;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'text', nullable: false })
   description: string;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 
-  // Foreign key (appointmentId) que referencia a otro servicio
-  @Column({ type: 'uuid' })
+  @Column({ type: 'uuid', nullable: false })
   appointmentId: string;
 
   @ManyToOne(() => Appointment, (appointment) => appointment.scores, {
     onDelete: 'CASCADE',
   })
   appointment: Appointment;
+
+  @Column({ type: 'uuid', nullable: false })
+  servicePointId: string;
+
+  @ManyToOne(() => ServicePoints, (point) => point.scores)
+  servicePoint: ServicePoints;
 }

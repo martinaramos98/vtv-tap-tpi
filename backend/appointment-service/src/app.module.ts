@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthMiddleware } from './middlewares/auth.middleware';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Score } from './models/score.entity';
+import { ServicePoints } from './models/servicePoints.entity';
 
 @Module({
   imports: [
@@ -21,7 +22,7 @@ import { Score } from './models/score.entity';
         username: configService.get<string>('DATABASE_USER', 'postgres'),
         password: configService.get<string>('DATABASE_PASSWORD', 'postgres'),
         database: configService.get<string>('DATABASE_NAME', 'main_db'),
-        entities: [Appointment, Score],
+        entities: [Appointment, Score, ServicePoints],
         synchronize: configService.get<string>('NODE_ENV') === 'development',
       }),
     }),

@@ -34,10 +34,25 @@ export class AppointmentService {
   }
 
   async findByClient(clientId: string) {
-    return await this.appointmentRepo.find({
+    const result = await this.appointmentRepo.find({
       where: { clientId },
-      relations: ['scores'],
+      relations: {
+        scores: {
+          servicePoint: true,
+        },
+      },
     });
+    return result.map((appointment) => ({
+      id: appointment.id,
+      matricula: appointment.matricula,
+      date: appointment.date,
+      scores: appointment.scores.map((scores) => ({
+        id: scores.id,
+        value: scores.value,
+        description: scores.servicePoint.description,
+        name: scores.servicePoint.name,
+      })),
+    }));
   }
 
   async findByMatricula(matricula: string, clientId: string) {

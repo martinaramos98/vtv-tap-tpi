@@ -8,9 +8,10 @@ import {
 } from "@/components/ui/item";
 import type { AppointmentWithScores } from "../interfaces/Appointment";
 import { LucideCalendar } from "lucide-react";
-import { Link } from "react-router";
+import { Button } from "@/components/ui/button";
 export const AppointmentClientItem: React.FC<{
   appointment: AppointmentWithScores;
+  onSelectAppointment: (appointment: AppointmentWithScores) => void;
 }> = (props) => {
   const estadoAppointment =
     props.appointment.scores.length > 0 ? "Completado" : "Pendiente";
@@ -25,9 +26,15 @@ export const AppointmentClientItem: React.FC<{
       </ItemDescription>
       <ItemContent>Estado: {estadoAppointment}</ItemContent>
       {props.appointment.scores.length > 0 && (
-        <Link to={`/detail/${props.appointment.id}`}>
-          <ItemActions>Ver Detalle</ItemActions>
-        </Link>
+        <ItemActions>
+          <Button
+            onClick={() => props.onSelectAppointment(props.appointment)}
+            variant={"ghost"}
+            size={"sm"}
+          >
+            Ver Detalle
+          </Button>
+        </ItemActions>
       )}
     </Item>
   );
