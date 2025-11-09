@@ -1,6 +1,10 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Appointment } from 'src/models/appointment.entity';
+import { Appointment } from '../models/appointment.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -11,21 +15,20 @@ export class AppointmentService {
   ) {}
 
   async create(data: { matricula: string; clientId: string; date: Date }) {
-    // TODO:  validar rol del usuario en el user-service
-
-    try {
-      const existing: Appointment | null = await this.appointmentRepo.findOne({
-        where: { matricula: data.matricula, date: data.date },
-      });
-      if (existing)
-        throw new BadRequestException(
-          'El turno ya está reservado para esa fecha',
-        );
-    } catch (error) {
-      console.error('Error checking existing appointment:', error);
-      throw new BadRequestException('Error al verificar disponibilidad');
+    if (!data.matricula || !data.clientId || !data.date) {
+      throw new BadRequestException('Datos incompletos para crear la reserva');
     }
+    const existing: Appointment | null = await this.appointmentRepo.findOne({
+      where: { matricula: data.matricula, date: data.date },
+    });
+    if (existing)
+      throw new BadRequestException(
+        'El turno ya está reservado para esa fecha',
+      );
     const appointment = this.appointmentRepo.create(data);
+    if (!appointment) {
+      throw new InternalServerErrorException('Error al crear la reserva');
+    }
     return await this.appointmentRepo.save(appointment);
   }
 
@@ -34,6 +37,9 @@ export class AppointmentService {
   }
 
   async findByClient(clientId: string) {
+    if (!clientId) {
+      throw new BadRequestException('ClientId es requerido');
+    }
     const result = await this.appointmentRepo.find({
       where: { clientId },
       relations: {
