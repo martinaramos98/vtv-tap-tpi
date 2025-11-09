@@ -13,9 +13,13 @@ import { useNavigate } from "react-router";
 
 type User = {
   id: string;
+  username: string;
   fullName: string;
   email: string;
-  role: "Administrator" | "Client";
+  role: {
+    id: string;
+    name: "Administrator" | "Client";
+  };
 };
 
 type AuthContextType = {
@@ -34,7 +38,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const navigate = useNavigate();
 
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(
+    Cookies.get("session_token") || null
+  );
 
   useEffect(() => {
     const sessionToken = Cookies.get("session_token");
@@ -64,7 +70,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         password,
       });
 
-      const userToken = tokenResponse.data.token;
+      const userToken = tokenResponse.data.access_token;
 
       Cookies.set("session_token", userToken, {
         expires: 1,
@@ -82,7 +88,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     Cookies.remove("session_token");
     setUser(null);
     setToken(null);
-    navigate("/login");
+    navigate("/auth/login");
   };
   const onUnauthorized = (error: AxiosError) => {
     if (error.response?.status === 401) {
@@ -91,7 +97,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
   const getUserData = async (token: string) => {
     try {
-      const userDataResponse = await userAPI.get("/auth/me", {
+      const userDataResponse = await userAPI.get("/auth/user", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -100,14 +106,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(userData);
     } catch (error) {
       console.error("Failed to fetch user data", error);
+      onUnauthorized(error as AxiosError);
     }
   };
+
   return (
     <AuthContext.Provider
       value={{
         user,
         token,
-        isAuthenticated: !!user && !!token,
+        isAuthenticated: !!token,
         signin,
         signup,
         signout,

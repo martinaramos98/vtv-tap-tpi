@@ -64,13 +64,13 @@ export class UserService {
       where: { username: email },
       relations: ['credential', 'role', 'role.permissions'],
     });
-    if (!user) throw new UnauthorizedException('Invalid credentials');
+    if (!user) throw new BadRequestException('User not found');
 
     const isMatch = await bcrypt.compare(
       password,
       user.credential.passwordHash,
     );
-    if (!isMatch) throw new UnauthorizedException('Invalid credentials');
+    if (!isMatch) throw new BadRequestException('Invalid credentials');
 
     const token = this.jwtService.sign({
       sub: user.id,

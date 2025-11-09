@@ -4,7 +4,6 @@ import {
   Post,
   Body,
   Get,
-  Req,
   Headers,
   UnauthorizedException,
   InternalServerErrorException,

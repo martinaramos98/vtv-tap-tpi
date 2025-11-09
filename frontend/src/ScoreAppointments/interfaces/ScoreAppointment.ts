@@ -10,6 +10,14 @@ export interface ScoreAppointment {
 
 export interface CreateScoreAppointmentDTO {
   appointmentId: string;
-  score: Score[];
+  value: number;
+  servicePointId: string;
   matricula: string;
+  description: string;
+}
+
+export interface ServicePoint {
+  name: string;
+  description: string;
+  id: string;
 }

@@ -8,6 +8,9 @@ async function bootstrap() {
 
   const port = configService.get<number>('SERVICE_PORT') || 3002;
 
+  app.enableCors({
+    origin: 'http://localhost:5173',
+  });
   await app.listen(port);
   console.log(`🚀 Appointment-Service running on port ${port}`);
 }

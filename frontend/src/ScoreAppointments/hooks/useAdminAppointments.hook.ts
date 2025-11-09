@@ -1,21 +1,24 @@
 import { useAuth } from "@/app/contexts/UserContext";
-import { appointmentAPI } from "@/app/rest/AppointmentAPI";
 import { scoringAPI } from "@/app/rest/ScoringAPI";
+import type {
+  CreateScoreAppointmentDTO,
+  ServicePoint,
+} from "../interfaces/ScoreAppointment";
 
 export interface IAdminAppointmentsHook {
   getAllAppointments: () => Promise<any>;
-  submitScoreAppointment: (scoreData: {
-    appointmentId: string;
-    score: Record<string, number>;
-  }) => Promise<any>;
+  submitScoreAppointment: (
+    scoreData: CreateScoreAppointmentDTO[]
+  ) => Promise<any>;
   getVerificationById: (id: string) => Promise<any>;
+  getScorePoints: () => Promise<ServicePoint[]>;
 }
 
 export const useAdminAppointmentsHook = (): IAdminAppointmentsHook => {
   const authContext = useAuth();
   const getAllAppointments = async () => {
     try {
-      const response = await appointmentAPI.get("/scores", {
+      const response = await scoringAPI.get("/scores", {
         headers: {
           Authorization: `Bearer ${authContext.token}`,
         },
@@ -28,7 +31,7 @@ export const useAdminAppointmentsHook = (): IAdminAppointmentsHook => {
 
   const getVerificationById = async (id: string) => {
     try {
-      const response = await appointmentAPI.get(`/scores/${id}`, {
+      const response = await scoringAPI.get(`/scores/${id}`, {
         headers: {
           Authorization: `Bearer ${authContext.token}`,
         },
@@ -39,10 +42,9 @@ export const useAdminAppointmentsHook = (): IAdminAppointmentsHook => {
     }
   };
 
-  const submitScoreAppointment = async (scoreData: {
-    appointmentId: string;
-    score: Record<string, number>;
-  }) => {
+  const submitScoreAppointment = async (
+    scoreData: CreateScoreAppointmentDTO[]
+  ) => {
     try {
       const response = await scoringAPI.post("/scores", scoreData, {
         headers: {
@@ -54,9 +56,26 @@ export const useAdminAppointmentsHook = (): IAdminAppointmentsHook => {
       console.error("Error submitting score for appointment:", error);
     }
   };
+  const getScorePoints = async () => {
+    try {
+      const response = await scoringAPI.get<ServicePoint[]>(
+        `/scores/service-points`,
+        {
+          headers: {
+            Authorization: `Bearer ${authContext.token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching score points:", error);
+      throw error;
+    }
+  };
   return {
     getAllAppointments,
     submitScoreAppointment,
     getVerificationById,
+    getScorePoints,
   };
 };

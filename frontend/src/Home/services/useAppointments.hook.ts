@@ -35,7 +35,7 @@ export const useAppointmentsHook = (): IAppointmentsService => {
   }) => {
     try {
       const response = await appointmentAPI.post(
-        "/appointments",
+        "/appointments/reserve",
         appointmentData,
         {
           headers: {

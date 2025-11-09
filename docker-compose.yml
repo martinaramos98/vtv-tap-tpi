@@ -85,7 +85,9 @@ services:
 
   # 🎨 Frontend (Vite)
   frontend:
-    build: ./frontend
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile.dev
     container_name: frontend
     restart: always
     depends_on:
@@ -104,10 +106,9 @@ services:
     ports:
       - "5173:5173"
     environment:
-      VITE_API_USER_URL: http://user-service:3001
-      VITE_API_APPOINTMENT_URL: http://appointment-service:3002
-      VITE_API_SCORING_URL: http://scoring-service:3003
-
+      VITE_API_USER_URL: http://localhost:8001
+      VITE_APPOINTMENT_API_URL: http://localhost:8002
+      VITE_SCORING_API_URL: http://localhost:8003
     networks:
       - app-network
 

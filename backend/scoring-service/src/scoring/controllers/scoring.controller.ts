@@ -1,13 +1,13 @@
 import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import { ScoreService } from '../services/scoring.service';
-import { Score } from '../models/scoring.model';
+import { ScoresCreateDTO } from '../interfaces/Scores';
 
 @Controller('scores')
 export class ScoreController {
   constructor(private readonly scoreService: ScoreService) {}
 
   @Post()
-  create(@Body() data: Partial<Score>) {
+  create(@Body() data: ScoresCreateDTO[]) {
     return this.scoreService.create(data);
   }
 
@@ -21,7 +21,12 @@ export class ScoreController {
     return this.scoreService.findAllCompleted();
   }
 
-  @Get('appointment/:appointmentId')
+  @Get('service-points')
+  getAllServicePoints() {
+    return this.scoreService.getAllServicePoints();
+  }
+
+  @Get(':appointmentId')
   findByAppointment(@Param('appointmentId') appointmentId: string) {
     return this.scoreService.findByAppointment(appointmentId);
   }

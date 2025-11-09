@@ -3,10 +3,10 @@ import { HomeClientView } from "@/Home/components/HomeClientView";
 import { createContext, useContext } from "react";
 
 export interface UIServiceContextValue {
-  admin: {
+  Administrator: {
     home: React.FC;
   };
-  client: {
+  Client: {
     home: React.FC;
   };
 }
@@ -19,10 +19,10 @@ export const UIServiceProvider: React.FC<React.PropsWithChildren> = ({
   children,
 }) => {
   const uiService: UIServiceContextValue = {
-    admin: {
+    Administrator: {
       home: HomeAdminView,
     },
-    client: {
+    Client: {
       home: HomeClientView,
     },
   };

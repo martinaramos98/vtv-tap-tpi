@@ -8,7 +8,9 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
 
   const port = configService.get<number>('SERVICE_PORT') || 3000;
-
+  app.enableCors({
+    origin: 'http://localhost:5173',
+  });
   await app.listen(port);
   console.log(`🚀 User-Service running on port ${port}`);
 }

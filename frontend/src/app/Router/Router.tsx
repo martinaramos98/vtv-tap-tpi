@@ -3,6 +3,8 @@ import { createBrowserRouter } from "react-router";
 import { HomePage } from "../Routes/HomePage";
 import { Login } from "../Routes/Login";
 import { SignupPage } from "../Routes/Signup";
+import { CreateAppointmentPage } from "../Routes/CreateAppointmentPage";
+import { ScoreFormPage } from "../Routes/ScoreFormPage";
 
 export const router = createBrowserRouter([
   {
@@ -12,6 +14,14 @@ export const router = createBrowserRouter([
       {
         index: true,
         Component: HomePage,
+      },
+      {
+        path: "/new-appointment",
+        Component: CreateAppointmentPage,
+      },
+      {
+        path: "/score-appointment/:appointmentId",
+        Component: ScoreFormPage,
       },
       {
         path: "auth",

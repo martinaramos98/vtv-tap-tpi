@@ -22,7 +22,7 @@ export const useScoreAppointments = (
       }
     };
     onInit();
-  }, [adminAppointmentsHook]);
+  }, []);
 
   return {
     appointments,

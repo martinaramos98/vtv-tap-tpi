@@ -15,7 +15,7 @@ export const AppointmentClientItem: React.FC<{
   const estadoAppointment =
     props.appointment.scores.length > 0 ? "Completado" : "Pendiente";
   return (
-    <Item>
+    <Item variant={"outline"}>
       <ItemMedia>
         <LucideCalendar />
       </ItemMedia>

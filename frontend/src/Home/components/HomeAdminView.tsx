@@ -1,7 +1,9 @@
+import { ScoreAppointmentView } from "@/app/Routes/ScoreAppointmentView";
+
 export const HomeAdminView: React.FC = () => {
   return (
     <>
-      <h1>Evaluaciones Pendientes</h1>
+      <ScoreAppointmentView />
     </>
   );
 };
